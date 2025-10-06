@@ -4,9 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Special Invitation</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💕</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     
@@ -292,18 +295,39 @@
   <div class="password-screen" id="passwordScreen">
     <div class="password-box">
       <h2 style="color: #FF8C42; font-family: 'Playfair Display', serif; margin-bottom: 10px;">💖 Special Invitation 💖</h2>
-      <p style="color: #C4A484; margin-bottom: 20px;">Enter our special date to continue</p>
-      <input type="text" class="password-input" id="passwordInput" placeholder="MM/DD/YYYY" maxlength="10">
-      <br><br>
-      <button class="password-btn" id="passwordBtn">💕 Enter 💕</button>
-      <p id="passwordError" style="color: #FF6B35; margin-top: 15px; display: none;">Not quite right... try again! 💖</p>
+      
+      <!-- Password Entry Section -->
+      <div id="passwordSection">
+        <p style="color: #C4A484; margin-bottom: 20px;">Enter our special date to continue</p>
+        <input type="text" class="password-input" id="passwordInput" placeholder="MM/DD/YYYY" maxlength="10">
+        <br><br>
+        <button class="password-btn" id="passwordBtn">💕 Enter 💕</button>
+        <p id="passwordError" style="color: #FF6B35; margin-top: 15px; display: none;">Not quite right... try again! 💖</p>
+        
+        <div style="margin: 30px 0 10px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 140, 66, 0.3), transparent);"></div>
+        <p style="color: #C4A484; font-size: 14px; margin: 15px 0 10px; text-align: center;">Already RSVPed?</p>
+        <button id="showStatusBtn" style="background: rgba(255, 140, 66, 0.2); border: 1px solid rgba(255, 140, 66, 0.5); color: #FF8C42; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; width: 100%;">Check My Status 🔍</button>
+      </div>
+      
+      <!-- Status Check Section -->
+      <div id="statusSection" style="display: none;">
+        <p style="color: #C4A484; margin-bottom: 20px;">Enter your email to check status</p>
+        <input type="email" class="password-input" id="statusEmailInput" placeholder="your.email@example.com">
+        <br><br>
+        <button class="password-btn" id="checkStatusBtn">📧 Check Status</button>
+        <p id="statusError" style="color: #FF6B35; margin-top: 15px; display: none;">No RSVP found for this email 😔</p>
+        <p id="statusSuccess" style="color: #32CD32; margin-top: 15px; display: none;">Welcome back! Loading your date... ✨</p>
+        
+        <div style="margin: 20px 0 10px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 140, 66, 0.3), transparent);"></div>
+        <button id="backToPasswordBtn" style="background: rgba(255, 140, 66, 0.2); border: 1px solid rgba(255, 140, 66, 0.5); color: #FF8C42; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%;">Back to Password Entry</button>
+      </div>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="main-content hidden" id="mainContent">
     <h1 class="title">Special Date Invitation</h1>
-    <p class="subtitle">Hey 7ayati, please accompany me on our special day 💕</p>
+    <p class="subtitle">Hey 7ayati, please accompany me on our special day for some quality time and great food 💕</p>
 
     <div class="card">
       <p style="font-size: 14px; color: #C4A484; text-transform: uppercase; margin: 0;">To</p>
@@ -374,6 +398,134 @@
     let selectedDate = null;
     let countdownActive = false;
     
+    // Initialize EmailJS
+    (function() {
+        emailjs.init("UAhI8tFCVxL_66c-4");
+    })();
+    
+    // Initialize Supabase
+    const supabaseUrl = 'https://nmtcmcsifcxbdyhcjhbv.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tdGNtY3NpZmN4YmR5aGNqaGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3MTQ4MTgsImV4cCI6MjA3NTI5MDgxOH0._10-hln-3X66qGARWSdkFoq2iU7Fe2vIObTn4nOMIr4';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+    // Store RSVP in Supabase database
+    async function storeRSVPInDatabase(email, selectedDate, dateText) {
+        try {
+            const { data, error } = await supabase
+                .from('rsvps')
+                .upsert([
+                    {
+                        email: email.toLowerCase(),
+                        selected_date: selectedDate,
+                        date_text: dateText,
+                        created_at: new Date().toISOString()
+                    }
+                ], { onConflict: 'email' });
+            
+            if (error) {
+                console.error('Error storing RSVP:', error);
+                return false;
+            }
+            
+            console.log('RSVP stored successfully in cloud!');
+            return true;
+        } catch (err) {
+            console.error('Database error:', err);
+            return false;
+        }
+    }
+    
+    // Retrieve RSVP from Supabase database
+    async function getRSVPFromDatabase(email) {
+        try {
+            const { data, error } = await supabase
+                .from('rsvps')
+                .select('*')
+                .eq('email', email.toLowerCase())
+                .single();
+            
+            if (error) {
+                console.log('No RSVP found in database:', error.message);
+                return null;
+            }
+            
+            return {
+                date: data.selected_date,
+                email: data.email,
+                dateText: data.date_text,
+                timestamp: new Date(data.created_at).getTime()
+            };
+        } catch (err) {
+            console.error('Database lookup error:', err);
+            return null;
+        }
+    }
+    
+    // Send automatic emails
+    function sendEmails(userEmail, selectedDateText, timeText) {
+        // Email to you (notification)
+        const notificationParams = {
+            to_email: "aby2004.im@gmail.com",
+            title: "💕 Special Date RSVP - She Chose!",
+            message: `🎉 WONDERFUL NEWS! 🎉
+
+She just picked her perfect date!
+
+Her Email: ${userEmail}
+Date: ${selectedDateText}
+Activity: Eating sushi and having a great time!
+Where: Elegant FaceTime together
+
+💕 This is going to be absolutely perfect! 💕
+
+Reply to her email to confirm!
+
+With love,
+Your Romantic Invitation System 📧`
+        };
+        
+        // Email to her (confirmation)
+        const confirmationParams = {
+            to_email: userEmail,
+            title: "💕 Your Sushi Date is Confirmed!",
+            message: `Hi Beautiful! 💕
+
+Your sushi date is officially confirmed!
+
+📅 Date: ${selectedDateText}
+🍣 Activity: Eating sushi and having a great time!
+📱 Where: Elegant FaceTime together
+
+I'm so excited to spend this special time with you! Can't wait! 😊
+
+See you soon!
+— Ibraheem 💖`
+        };
+        
+        // Send notification email to you
+        emailjs.send("service_2px4o4j", "template_cwx0mmv", notificationParams)
+            .then(function(response) {
+                console.log('Notification email sent successfully!', response.status, response.text);
+                alert('📧 Notification sent to Ibraheem!');
+            })
+            .catch(function(error) {
+                console.log('Notification email failed...', error);
+                alert('Email sending failed, but your date is still saved!');
+            });
+            
+        // Send confirmation email to her
+        setTimeout(() => {
+            emailjs.send("service_2px4o4j", "template_cwx0mmv", confirmationParams)
+                .then(function(response) {
+                    console.log('Confirmation email sent successfully!', response.status, response.text);
+                    alert('📧 Confirmation email sent to you!');
+                })
+                .catch(function(error) {
+                    console.log('Confirmation email failed...', error);
+                });
+        }, 2000);
+    }
+    
     function checkPassword() {
       const input = document.getElementById('passwordInput').value;
       const correctPassword = '10/20/2022';
@@ -385,6 +537,9 @@
         setTimeout(() => {
           document.getElementById('passwordScreen').classList.add('hidden');
           document.getElementById('mainContent').classList.remove('hidden');
+          
+          // Load saved countdown after showing main content
+          loadSavedCountdown();
         }, 1000);
         
         // Request notification permission when they enter
@@ -554,13 +709,165 @@
       }
     }
 
+    // Check for saved date and start countdown immediately
+    function loadSavedCountdown() {
+      const saved = localStorage.getItem('dateReminder');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          selectedDate = data.date;
+          
+          // Update the display to show the saved date
+          const dateOptions = document.querySelectorAll('.date-option');
+          dateOptions.forEach(option => {
+            if (option.dataset.date === selectedDate) {
+              option.classList.add('selected');
+              const dayText = option.querySelector('div').textContent;
+              document.getElementById('dateValue').textContent = dayText;
+            }
+          });
+          
+          // Start countdown immediately
+          startCountdown();
+          
+          // Update RSVP button and show status
+          if (data.email) {
+            document.getElementById('emailInput').value = data.email;
+            const rsvpBtn = document.getElementById('rsvpBtn');
+            rsvpBtn.innerHTML = '✨ Date Already Confirmed! ✨';
+            rsvpBtn.style.background = 'linear-gradient(45deg, #32CD32, #90EE90)';
+            rsvpBtn.style.color = '#000';
+            rsvpBtn.disabled = true;
+            
+
+          }
+        } catch (e) {
+          console.log('No valid saved date found');
+        }
+      } else {
+
+      }
+    }
+    
+    // Check status by email from password screen (with cloud database)
+    async function checkStatusFromLogin() {
+      const email = document.getElementById('statusEmailInput').value;
+      const statusError = document.getElementById('statusError');
+      const statusSuccess = document.getElementById('statusSuccess');
+      
+      // Hide previous messages
+      statusError.style.display = 'none';
+      statusSuccess.style.display = 'none';
+      
+      if (!email || !email.includes('@')) {
+        statusError.textContent = 'Please enter a valid email address! 📧';
+        statusError.style.display = 'block';
+        return;
+      }
+      
+      // Show checking message
+      statusSuccess.textContent = 'Checking your RSVP across all devices... 🔍';
+      statusSuccess.style.display = 'block';
+      
+      // First check localStorage (fast)
+      const saved = localStorage.getItem('dateReminder');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.email && data.email.toLowerCase() === email.toLowerCase()) {
+            loadRSVPAndTransition(data, email);
+            return;
+          }
+        } catch (e) {
+          console.log('Error checking local data');
+        }
+      }
+      
+      // Check cloud database
+      const cloudData = await getRSVPFromDatabase(email);
+      if (cloudData) {
+        // Found in cloud - save locally and load
+        localStorage.setItem('dateReminder', JSON.stringify(cloudData));
+        loadRSVPAndTransition(cloudData, email);
+      } else {
+        // No RSVP found anywhere
+        statusSuccess.style.display = 'none';
+        statusError.textContent = "No RSVP found for this email. Use password entry to make a new RSVP! 💕";
+        statusError.style.display = 'block';
+      }
+    }
+    
+    // Load RSVP data and transition to main content
+    function loadRSVPAndTransition(data, email) {
+      const statusSuccess = document.getElementById('statusSuccess');
+      statusSuccess.textContent = 'RSVP found! Loading your date... ✨';
+      
+      setTimeout(() => {
+        // Load their RSVP data
+        selectedDate = data.date;
+        
+        // Hide password screen and show main content
+        document.getElementById('passwordScreen').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        
+        // Update display
+        const dateOptions = document.querySelectorAll('.date-option');
+        dateOptions.forEach(option => {
+          if (option.dataset.date === selectedDate) {
+            option.classList.add('selected');
+            const dayText = option.querySelector('div').textContent;
+            document.getElementById('dateValue').textContent = data.dateText || dayText;
+          }
+        });
+        
+        // Start countdown
+        startCountdown();
+        
+        // Update UI
+        document.getElementById('emailInput').value = email;
+        const rsvpBtn = document.getElementById('rsvpBtn');
+        rsvpBtn.innerHTML = '✨ Your Date is Confirmed! ✨';
+        rsvpBtn.style.background = 'linear-gradient(45deg, #32CD32, #90EE90)';
+        rsvpBtn.style.color = '#000';
+        rsvpBtn.disabled = true;
+      }, 1500);
+    }
+    
+    // Toggle between password and status sections
+    function showStatusSection() {
+      document.getElementById('passwordSection').style.display = 'none';
+      document.getElementById('statusSection').style.display = 'block';
+    }
+    
+    function showPasswordSection() {
+      document.getElementById('passwordSection').style.display = 'block';
+      document.getElementById('statusSection').style.display = 'none';
+      // Clear status inputs
+      document.getElementById('statusEmailInput').value = '';
+      document.getElementById('statusError').style.display = 'none';
+      document.getElementById('statusSuccess').style.display = 'none';
+    }
+    
     // Initialize everything when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      // Load any saved countdown immediately
+      loadSavedCountdown();
+      
       // Password functionality
       document.getElementById('passwordBtn').addEventListener('click', checkPassword);
       document.getElementById('passwordInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           checkPassword();
+        }
+      });
+      
+      // Status check functionality in password screen
+      document.getElementById('showStatusBtn').addEventListener('click', showStatusSection);
+      document.getElementById('backToPasswordBtn').addEventListener('click', showPasswordSection);
+      document.getElementById('checkStatusBtn').addEventListener('click', checkStatusFromLogin);
+      document.getElementById('statusEmailInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          checkStatusFromLogin();
         }
       });
 
@@ -622,19 +929,15 @@
         // Set up reminders
         setDateReminders(selectedDate, emailInput.value);
         
-        // Send notification email to you
-        const subject = encodeURIComponent('💕 Special Date RSVP - She Chose! 💕');
-        const body = encodeURIComponent(`🎉 WONDERFUL NEWS! 🎉\n\nShe just picked her perfect date!\n\nHer Email: ${emailInput.value}\nDate: ${document.getElementById('dateValue').textContent}\nTime: ${document.getElementById('timeValue').textContent}\nPlan: Delicious Sushi Date\nWhere: Cozy FaceTime Together\n\n💕 This is going to be perfect 💕\n\nReply to her email to confirm! 📧`);
+        // Store in cloud database
+        const selectedDateText = document.getElementById('dateValue').textContent;
+        const timeText = "Flexible timing based on your choice";
         
-        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        // Store in Supabase (cloud) and localStorage (local backup)
+        storeRSVPInDatabase(emailInput.value, selectedDate, selectedDateText);
         
-        // Send confirmation email to her
-        const confirmSubject = encodeURIComponent('💕 Your Sushi Date is Confirmed!');
-        const confirmBody = encodeURIComponent(`Hi Beautiful! 💕\n\nYour sushi date is officially confirmed!\n\n📅 Date: ${document.getElementById('dateValue').textContent}\n🕐 Time: ${document.getElementById('timeValue').textContent}\n🍣 Plan: Delicious Sushi Date!\n📱 Where: Cozy FaceTime Together\n\nI'm so excited to spend this special time with you! Can't wait! 😊\n\n— Ibraheem 💖`);
-        
-        setTimeout(() => {
-          window.open(`mailto:${emailInput.value}?subject=${confirmSubject}&body=${confirmBody}`, '_blank');
-        }, 1000);
+        // Send automatic emails
+        sendEmails(emailInput.value, selectedDateText, timeText);
         
         // Update button
         rsvpBtn.innerHTML = '✨ Date Confirmed! Check your email! ✨';
@@ -649,7 +952,7 @@
           timestamp: Date.now()
         }));
         
-        alert('Perfect! 💕 Check your email for confirmation! You\'ll also get reminder notifications before our date! 🔔');
+        alert('Perfect! 💕 Your date is saved and countdown started! \n\n📧 Automatic emails are being sent now!\n• You\'ll get a confirmation email\n• Ibraheem will get notified immediately\n\nThe countdown will continue even if you close this page! ✨');
       });
     });
   </script>

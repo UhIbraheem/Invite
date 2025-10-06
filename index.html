@@ -7,7 +7,17 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💕</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://            .catch(function(error) {
+                console.log('Notification email failed...', error);
+                console.log('Failed params:', notificationParams);
+                console.log('Make sure EmailJS template uses: name, email, title, time, message');
+                // Show error indicator
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#FF6B35;color:white;padding:10px;border-radius:8px;z-index:10001;font-size:14px;';
+                statusDiv.textContent = '⚠ Email issue - RSVP still saved!';
+                document.body.appendChild(statusDiv);
+                setTimeout(() => statusDiv.remove(), 4000);
+            });.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -465,8 +475,10 @@
     function sendEmails(userEmail, selectedDateText, timeText) {
         // Email to you (notification)
         const notificationParams = {
-            to_email: "aby2004.im@gmail.com",
+            name: userEmail,
+            email: userEmail,
             title: "💕 Special Date RSVP - She Chose!",
+            time: new Date().toLocaleString(),
             message: `🎉 WONDERFUL NEWS! 🎉
 
 She just picked her perfect date!
@@ -478,16 +490,15 @@ Where: Elegant FaceTime together
 
 💕 This is going to be absolutely perfect! 💕
 
-Reply to her email to confirm!
-
-With love,
-Your Romantic Invitation System 📧`
+Reply to her email to confirm!`
         };
         
         // Email to her (confirmation)
         const confirmationParams = {
-            to_email: userEmail,
+            name: "Ibraheem",
+            email: userEmail,
             title: "💕 Your Sushi Date is Confirmed!",
+            time: new Date().toLocaleString(),
             message: `Hi Beautiful! 💕
 
 Your sushi date is officially confirmed!
@@ -503,25 +514,44 @@ See you soon!
         };
         
         // Send notification email to you
-        emailjs.send("service_2px4o4j", "template_cwx0mmv", notificationParams)
+        emailjs.send("service_2px4o4j", "template_w4f5h7s", notificationParams)
             .then(function(response) {
                 console.log('Notification email sent successfully!', response.status, response.text);
-                alert('📧 Notification sent to Ibraheem!');
+                console.log('Email sent to: aby2004.im@gmail.com');
+                // Show brief success indicator
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'position:fixed;top:20px;right:20px;background:#32CD32;color:white;padding:10px;border-radius:8px;z-index:10001;font-size:14px;';
+                statusDiv.textContent = '✓ Notification sent!';
+                document.body.appendChild(statusDiv);
+                setTimeout(() => statusDiv.remove(), 3000);
             })
             .catch(function(error) {
                 console.log('Notification email failed...', error);
-                alert('Email sending failed, but your date is still saved!');
+                console.log('Failed params:', notificationParams);
+                console.log('Make sure EmailJS template uses: name, email, title, time, message');
             });
             
-        // Send confirmation email to her
+        // Send confirmation email to her  
         setTimeout(() => {
-            emailjs.send("service_2px4o4j", "template_cwx0mmv", confirmationParams)
+            emailjs.send("service_2px4o4j", "template_w4f5h7s", confirmationParams)
                 .then(function(response) {
                     console.log('Confirmation email sent successfully!', response.status, response.text);
-                    alert('📧 Confirmation email sent to you!');
+                    // Show brief success indicator
+                    const statusDiv = document.createElement('div');
+                    statusDiv.style.cssText = 'position:fixed;top:60px;right:20px;background:#FF8C42;color:white;padding:10px;border-radius:8px;z-index:10001;font-size:14px;';
+                    statusDiv.textContent = '✓ Confirmation sent!';
+                    document.body.appendChild(statusDiv);
+                    setTimeout(() => statusDiv.remove(), 3000);
                 })
                 .catch(function(error) {
                     console.log('Confirmation email failed...', error);
+                    console.log('Failed params:', confirmationParams);
+                    // Show error indicator
+                    const statusDiv = document.createElement('div');
+                    statusDiv.style.cssText = 'position:fixed;top:60px;right:20px;background:#FF6B35;color:white;padding:10px;border-radius:8px;z-index:10001;font-size:14px;';
+                    statusDiv.textContent = '⚠ Email issue - RSVP still saved!';
+                    document.body.appendChild(statusDiv);
+                    setTimeout(() => statusDiv.remove(), 4000);
                 });
         }, 2000);
     }
@@ -952,7 +982,10 @@ See you soon!
           timestamp: Date.now()
         }));
         
-        alert('Perfect! 💕 Your date is saved and countdown started! \n\n📧 Automatic emails are being sent now!\n• You\'ll get a confirmation email\n• Ibraheem will get notified immediately\n\nThe countdown will continue even if you close this page! ✨');
+        // Show success message after emails are sent
+        setTimeout(() => {
+          alert('Perfect! 💕 Your date is saved and countdown started! \n\n📧 Automatic emails are being sent now!\n• You\'ll get a confirmation email\n• Ibraheem will get notified immediately\n\nThe countdown will continue even if you close this page! ✨');
+        }, 1000);
       });
     });
   </script>

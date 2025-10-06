@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Special Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a1a1a 80%, #0a0a0a 100%);
+      color: #F5F5F5;
+      min-height: 100vh;
+    }
+    
+    .password-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 10, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .password-box {
+      background: #1C1C1C;
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid #FF8C42;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    
+    .password-input {
+      background: rgba(255, 140, 66, 0.1);
+      border: 1px solid #FF8C42;
+      border-radius: 12px;
+      padding: 15px;
+      color: #F5F5F5;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+      margin: 20px 0;
+      outline: none;
+    }
+    
+    .password-btn {
+      background: linear-gradient(45deg, #FF8C42, #FF6B35);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .password-btn:hover {
+      background: linear-gradient(45deg, #FF6B35, #FFA500);
+    }
+    
+    .hidden { display: none !important; }
+    
+    .main-content {
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      margin: 0 0 10px;
+      background: linear-gradient(135deg, #F5F5F5, #FF8C42);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: #C4A484;
+      font-size: 18px;
+      margin-bottom: 40px;
+    }
+    
+    .card {
+      background: #1C1C1C;
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      margin: 20px 0;
+    }
+    
+    .date-selection {
+      margin: 30px 0;
+      padding: 20px;
+      background: rgba(255, 140, 66, 0.05);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 140, 66, 0.15);
+    }
+    
+    .date-option {
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .date-option:hover {
+      border-color: #FF8C42;
+      background: rgba(255, 140, 66, 0.1);
+    }
+    
+    .date-option.selected {
+      background: linear-gradient(45deg, #FF8C42, #FF6B35);
+      color: white;
+      border-color: #FF8C42;
+    }
+    
+    .date-option.selected div {
+      color: white !important;
+    }
+    
+    .rsvp-btn {
+      background: linear-gradient(45deg, #FF8C42, #FF6B35);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 20px;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .rsvp-btn:not(:disabled) {
+      opacity: 1;
+      cursor: pointer;
+    }
+    
+    .rsvp-btn:not(:disabled):hover {
+      background: linear-gradient(45deg, #FF6B35, #FFA500);
+    }
+    
+    .countdown {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 30px 0;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .countdown.active {
+      opacity: 1;
+    }
+    
+    .countdown .box {
+      background: rgba(255, 140, 66, 0.1);
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      min-width: 80px;
+      text-align: center;
+    }
+    
+    .countdown .num {
+      font-size: 32px;
+      font-weight: 700;
+      color: #FF8C42;
+    }
+    
+    .countdown .cap {
+      font-size: 12px;
+      color: #C4A484;
+      text-transform: uppercase;
+    }
+
+    /* Hearts and flowers animation */
+    .hearts {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: -10px;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .hearts span {
+      position: absolute;
+      bottom: -10px;
+      font-size: 20px;
+      animation: floatUp linear forwards;
+    }
+    
+    @keyframes floatUp {
+      to {
+        transform: translateY(-110vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes explode {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.8) rotate(360deg) translateY(100vh);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes confettiExplode {
+      0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      20% {
+        transform: translate(calc(var(--endX) - 50%), calc(var(--endY) - 50%)) scale(1) rotate(180deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(var(--endX) - 50%), calc(100vh + 50px)) scale(0.8) rotate(720deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes confettiBlast {
+      0% {
+        left: var(--startX);
+        top: var(--startY);
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      25% {
+        left: var(--midX);
+        top: var(--midY);
+        transform: translate(-50%, -50%) scale(1.2) rotate(180deg);
+        opacity: 1;
+      }
+      60% {
+        left: var(--finalX);
+        top: calc(var(--midY) + 20px);
+        transform: translate(-50%, -50%) scale(1) rotate(360deg);
+        opacity: 1;
+      }
+      100% {
+        left: var(--finalX);
+        top: var(--finalY);
+        transform: translate(-50%, -50%) scale(0.8) rotate(540deg);
+        opacity: 0;
+      }
+    }
+    
+    .flowers span {
+      position: absolute;
+      bottom: -10px;
+      font-size: 18px;
+      animation: floatUp linear forwards;
+    }
+
+    @media (max-width: 768px) {
+      .title { font-size: 36px; }
+      .card { padding: 30px 20px; }
+      .countdown { flex-wrap: wrap; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Screen -->
+  <div class="password-screen" id="passwordScreen">
+    <div class="password-box">
+      <h2 style="color: #FF8C42; font-family: 'Playfair Display', serif; margin-bottom: 10px;">💖 Special Invitation 💖</h2>
+      <p style="color: #C4A484; margin-bottom: 20px;">Enter our special date to continue</p>
+      <input type="text" class="password-input" id="passwordInput" placeholder="MM/DD/YYYY" maxlength="10">
+      <br><br>
+      <button class="password-btn" id="passwordBtn">💕 Enter 💕</button>
+      <p id="passwordError" style="color: #FF6B35; margin-top: 15px; display: none;">Not quite right... try again! 💖</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content hidden" id="mainContent">
+    <h1 class="title">Special Date Invitation</h1>
+    <p class="subtitle">Hey 7ayati, please accompany me on our special day 💕</p>
+
+    <div class="card">
+      <p style="font-size: 14px; color: #C4A484; text-transform: uppercase; margin: 0;">To</p>
+      <p style="font-size: 24px; font-family: 'Playfair Display', serif; margin: 5px 0 30px;">My Love</p>
+
+      <div class="date-selection">
+        <p style="text-align: center; margin-bottom: 15px; font-size: 16px; color: #FF8C42;">💕 Pick Your Perfect Day:</p>
+        
+        <div class="date-option" data-date="2025-10-20">
+          <div style="font-size: 16px; font-weight: 600; color: #FF8C42;">Monday, October 20th</div>
+          <div style="font-size: 14px; color: #C4A484; margin-top: 5px;">12:00 - 3:00 PM (FIXED TIME)</div>
+        </div>
+        
+        <div class="date-option" data-date="2025-10-21">
+          <div style="font-size: 16px; font-weight: 600; color: #FF8C42;">Tuesday, October 21st</div>
+          <div style="font-size: 14px; color: #C4A484; margin-top: 5px;">12:00 - 3:00 PM (flexible ±1 hour)</div>
+        </div>
+        
+        <div class="date-option" data-date="2025-10-23">
+          <div style="font-size: 16px; font-weight: 600; color: #FF8C42;">Thursday, October 23rd</div>
+          <div style="font-size: 14px; color: #C4A484; margin-top: 5px;">12:00 - 3:00 PM (flexible ±1 hour)</div>
+        </div>
+      </div>
+
+      <div style="margin: 30px 0; padding: 20px; background: rgba(255, 140, 66, 0.05); border-radius: 16px; border: 1px solid rgba(255, 140, 66, 0.15);">
+        <p style="text-align: center; margin-bottom: 15px; font-size: 16px; color: #FF8C42;">💌 Your Email (for confirmation):</p>
+        <input type="email" id="emailInput" placeholder="your.email@example.com" style="background: rgba(255, 140, 66, 0.1); border: 1px solid #FF8C42; border-radius: 12px; padding: 15px; color: #F5F5F5; font-size: 16px; text-align: center; width: 100%; outline: none; margin-bottom: 10px;">
+        <p style="font-size: 12px; color: #C4A484; text-align: center; margin: 0;">I'll send you a sweet confirmation! 💕</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 30px 0;">
+        <div style="background: rgba(255, 140, 66, 0.05); border: 1px solid rgba(255, 140, 66, 0.15); border-radius: 12px; padding: 15px;">
+          <div style="font-size: 12px; color: #C4A484; text-transform: uppercase;">Your Choice</div>
+          <div style="font-size: 18px; margin-top: 5px;" id="dateValue">Choose a date above</div>
+        </div>
+        <div style="background: rgba(255, 140, 66, 0.05); border: 1px solid rgba(255, 140, 66, 0.15); border-radius: 12px; padding: 15px;">
+          <div style="font-size: 12px; color: #C4A484; text-transform: uppercase;">What We're Doing</div>
+          <div style="font-size: 18px; margin-top: 5px;">Eating sushi and having a great time!</div>
+        </div>
+        <div style="grid-column: 1 / -1; background: rgba(255, 140, 66, 0.05); border: 1px solid rgba(255, 140, 66, 0.15); border-radius: 12px; padding: 15px;">
+          <div style="font-size: 12px; color: #C4A484; text-transform: uppercase;">Where</div>
+          <div style="font-size: 18px; margin-top: 5px;">Elegant FaceTime together</div>
+        </div>
+      </div>
+
+      <div class="countdown" id="countdown">
+        <div class="box"><div class="num" id="cd-d">0</div><div class="cap">days</div></div>
+        <div class="box"><div class="num" id="cd-h">0</div><div class="cap">hours</div></div>
+        <div class="box"><div class="num" id="cd-m">0</div><div class="cap">mins</div></div>
+        <div class="box"><div class="num" id="cd-s">0</div><div class="cap">secs</div></div>
+      </div>
+
+      <button class="rsvp-btn" id="rsvpBtn" disabled>💕 RSVP & Start Our Countdown! 💕</button>
+    </div>
+
+    <div class="card">
+      <h2 style="margin: 0 0 15px; font-family: 'Playfair Display', serif; color: #FF8C42;">What to Expect ✨</h2>
+      <p style="color: #C4A484; line-height: 1.6; margin-bottom: 20px;">You will bring your hot self wearing a nice dress to a perfect sushi night. I am beyond excited to spend time with you on this very special day habibti. Pick any day and we will get a countdown and reminders.</p>
+      <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 140, 66, 0.3), transparent); margin: 20px 0;"></div>
+      <p style="font-family: 'Playfair Display', serif; color: #FF8C42; font-size: 20px;">— Can't wait to see you, Your love</p>
+    </div>
+  </div>
+
+  <div class="hearts" id="hearts"></div>
+  <div class="flowers" id="flowers"></div>
+
+  <script>
+    let selectedDate = null;
+    let countdownActive = false;
+    
+    function checkPassword() {
+      const input = document.getElementById('passwordInput').value;
+      const correctPassword = '10/20/2022';
+      
+      if (input === correctPassword) {
+        // Trigger explosion animation
+        passwordSuccessExplosion();
+        
+        setTimeout(() => {
+          document.getElementById('passwordScreen').classList.add('hidden');
+          document.getElementById('mainContent').classList.remove('hidden');
+        }, 1000);
+        
+        // Request notification permission when they enter
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+      } else {
+        document.getElementById('passwordError').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+        setTimeout(() => {
+          document.getElementById('passwordError').style.display = 'none';
+        }, 3000);
+      }
+    }
+    
+    // Password success explosion animation
+    function passwordSuccessExplosion() {
+      const button = document.getElementById('passwordBtn');
+      const buttonRect = button.getBoundingClientRect();
+      const centerX = buttonRect.left + buttonRect.width / 2;
+      const centerY = buttonRect.top + buttonRect.height / 2;
+      
+      const explosionContainer = document.createElement('div');
+      explosionContainer.style.position = 'fixed';
+      explosionContainer.style.top = '0';
+      explosionContainer.style.left = '0';
+      explosionContainer.style.width = '100vw';
+      explosionContainer.style.height = '100vh';
+      explosionContainer.style.pointerEvents = 'none';
+      explosionContainer.style.zIndex = '9999';
+      document.body.appendChild(explosionContainer);
+      
+      const emojis = ['💕', '❤️', '💖', '💗', '💘', '💝', '🌸', '🌹', '🌺', '💐', '🌷', '💋', '😍', '🥰', '😘', '💞', '💓', '💟', '♥️', '💌'];
+      
+      for(let i = 0; i < 50; i++) {
+        const emoji = document.createElement('div');
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.position = 'absolute';
+        emoji.style.fontSize = Math.random() * 15 + 18 + 'px';
+        emoji.style.left = centerX + 'px';
+        emoji.style.top = centerY + 'px';
+        emoji.style.transform = 'translate(-50%, -50%)';
+        emoji.style.zIndex = '10000';
+        
+        // Create upward explosion with spread
+        const angle = (Math.random() - 0.5) * Math.PI * 0.8; // Spread in upward arc
+        const initialVelocity = Math.random() * 200 + 150;
+        const horizontalVelocity = Math.sin(angle) * initialVelocity;
+        const verticalVelocity = Math.cos(angle) * initialVelocity;
+        
+        // Calculate where it should land across the screen
+        const finalX = centerX + horizontalVelocity + (Math.random() - 0.5) * 400;
+        const finalY = window.innerHeight + 100; // Fall off screen
+        
+        emoji.style.setProperty('--startX', centerX + 'px');
+        emoji.style.setProperty('--startY', centerY + 'px');
+        emoji.style.setProperty('--midX', (centerX + horizontalVelocity) + 'px');
+        emoji.style.setProperty('--midY', (centerY - verticalVelocity) + 'px');
+        emoji.style.setProperty('--finalX', finalX + 'px');
+        emoji.style.setProperty('--finalY', finalY + 'px');
+        
+        emoji.style.animation = `confettiBlast ${3 + Math.random() * 2}s ease-out forwards`;
+        emoji.style.animationDelay = Math.random() * 0.2 + 's';
+        
+        explosionContainer.appendChild(emoji);
+      }
+      
+      setTimeout(() => {
+        document.body.removeChild(explosionContainer);
+      }, 6000);
+    }
+    
+    // Reminder system
+    function setDateReminders(selectedDateStr, userEmail) {
+      const eventDate = new Date(selectedDateStr + ' 14:00');
+      const now = new Date();
+      
+      // Set reminders: 1 day before, 1 hour before, 10 minutes before
+      const reminders = [
+        { time: new Date(eventDate.getTime() - 24 * 60 * 60 * 1000), label: '1 day' },
+        { time: new Date(eventDate.getTime() - 60 * 60 * 1000), label: '1 hour' },
+        { time: new Date(eventDate.getTime() - 10 * 60 * 1000), label: '10 minutes' }
+      ];
+      
+      reminders.forEach(reminder => {
+        if (reminder.time > now) {
+          const timeUntilReminder = reminder.time.getTime() - now.getTime();
+          
+          setTimeout(() => {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(`💕 Sushi Date Reminder!`, {
+                body: `Your special date is in ${reminder.label}! 🍣✨`,
+                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💖</text></svg>'
+              });
+            }
+          }, timeUntilReminder);
+        }
+      });
+    }
+
+    function startCountdown() {
+      if (!selectedDate) return;
+      
+      countdownActive = true;
+      document.getElementById('countdown').classList.add('active');
+      
+      function tick() {
+        if (!countdownActive) return;
+        
+        const now = Date.now();
+        const target = new Date(selectedDate + ' 14:00').getTime();
+        let diff = Math.max(0, target - now);
+        
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        diff -= d * 86400000;
+        
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        diff -= h * 3600000;
+        
+        const m = Math.floor(diff / (1000 * 60));
+        diff -= m * 60000;
+        
+        const s = Math.floor(diff / 1000);
+        
+        document.getElementById('cd-d').textContent = d;
+        document.getElementById('cd-h').textContent = h;
+        document.getElementById('cd-m').textContent = m;
+        document.getElementById('cd-s').textContent = s;
+      }
+      
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // Floating hearts and flowers animation
+    function burstHeartsAndFlowers() {
+      const hearts = document.getElementById('hearts');
+      const flowers = document.getElementById('flowers');
+      
+      // Hearts
+      for(let i = 0; i < 20; i++) {
+        const heart = document.createElement('span');
+        heart.textContent = Math.random() < 0.5 ? '❤️' : '💖';
+        const left = Math.random() * 100;
+        const dur = 4 + Math.random() * 4;
+        const delay = Math.random() * 0.8;
+        heart.style.left = left + 'vw';
+        heart.style.animationDuration = dur + 's';
+        heart.style.animationDelay = delay + 's';
+        hearts.appendChild(heart);
+        setTimeout(() => heart.remove(), (dur + 1) * 1000);
+      }
+      
+      // Flowers
+      for(let i = 0; i < 15; i++) {
+        const flower = document.createElement('span');
+        const flowerEmojis = ['🌸', '🌹', '🌺', '💐', '🌷'];
+        flower.textContent = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+        const left = Math.random() * 100;
+        const dur = 5 + Math.random() * 3;
+        const delay = Math.random() * 1.2;
+        flower.style.left = left + 'vw';
+        flower.style.animationDuration = dur + 's';
+        flower.style.animationDelay = delay + 's';
+        flowers.appendChild(flower);
+        setTimeout(() => flower.remove(), (dur + 1) * 1000);
+      }
+    }
+
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Password functionality
+      document.getElementById('passwordBtn').addEventListener('click', checkPassword);
+      document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          checkPassword();
+        }
+      });
+
+      // Date selection
+      const dateOptions = document.querySelectorAll('.date-option');
+      const rsvpBtn = document.getElementById('rsvpBtn');
+      
+      dateOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          // Remove selected from all
+          dateOptions.forEach(opt => opt.classList.remove('selected'));
+          // Add selected to clicked
+          option.classList.add('selected');
+          
+          selectedDate = option.dataset.date;
+          
+          // Update display
+          const dayText = option.querySelector('div').textContent;
+          const timeText = option.querySelector('div:nth-child(2)').textContent;
+          document.getElementById('dateValue').textContent = dayText;
+          document.getElementById('timeValue').textContent = timeText;
+          
+          // Check if both date and email are ready
+          checkRSVPReady();
+        });
+      });
+      
+      // Check if RSVP button should be enabled
+      function checkRSVPReady() {
+        const emailInput = document.getElementById('emailInput');
+        if (selectedDate && emailInput.value && emailInput.value.includes('@')) {
+          rsvpBtn.disabled = false;
+        } else {
+          rsvpBtn.disabled = true;
+        }
+      }
+      
+      // Enable RSVP when email is entered
+      document.getElementById('emailInput').addEventListener('input', checkRSVPReady);
+
+      // RSVP button
+      rsvpBtn.addEventListener('click', () => {
+        const emailInput = document.getElementById('emailInput');
+        
+        if (!selectedDate) {
+          alert('Please pick a date first!');
+          return;
+        }
+        
+        if (!emailInput.value || !emailInput.value.includes('@')) {
+          alert('Please enter your email address so I can send you a confirmation! 💕');
+          emailInput.focus();
+          return;
+        }
+        
+        startCountdown();
+        burstHeartsAndFlowers();
+        
+        // Set up reminders
+        setDateReminders(selectedDate, emailInput.value);
+        
+        // Send notification email to you
+        const subject = encodeURIComponent('💕 Special Date RSVP - She Chose! 💕');
+        const body = encodeURIComponent(`🎉 WONDERFUL NEWS! 🎉\n\nShe just picked her perfect date!\n\nHer Email: ${emailInput.value}\nDate: ${document.getElementById('dateValue').textContent}\nTime: ${document.getElementById('timeValue').textContent}\nPlan: Delicious Sushi Date\nWhere: Cozy FaceTime Together\n\n💕 This is going to be perfect 💕\n\nReply to her email to confirm! 📧`);
+        
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        
+        // Send confirmation email to her
+        const confirmSubject = encodeURIComponent('💕 Your Sushi Date is Confirmed!');
+        const confirmBody = encodeURIComponent(`Hi Beautiful! 💕\n\nYour sushi date is officially confirmed!\n\n📅 Date: ${document.getElementById('dateValue').textContent}\n🕐 Time: ${document.getElementById('timeValue').textContent}\n🍣 Plan: Delicious Sushi Date!\n📱 Where: Cozy FaceTime Together\n\nI'm so excited to spend this special time with you! Can't wait! 😊\n\n— Ibraheem 💖`);
+        
+        setTimeout(() => {
+          window.open(`mailto:${emailInput.value}?subject=${confirmSubject}&body=${confirmBody}`, '_blank');
+        }, 1000);
+        
+        // Update button
+        rsvpBtn.innerHTML = '✨ Date Confirmed! Check your email! ✨';
+        rsvpBtn.style.background = 'linear-gradient(45deg, #32CD32, #90EE90)';
+        rsvpBtn.style.color = '#000';
+        rsvpBtn.disabled = true;
+        
+        // Store reminder
+        localStorage.setItem('dateReminder', JSON.stringify({
+          date: selectedDate,
+          email: emailInput.value,
+          timestamp: Date.now()
+        }));
+        
+        alert('Perfect! 💕 Check your email for confirmation! You\'ll also get reminder notifications before our date! 🔔');
+      });
+    });
+  </script>
+</body>
+</html>
